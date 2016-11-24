@@ -1,4 +1,5 @@
 const parser = new DOMParser()
+const { shell } = require('electron')
 
 const linksSection = document.querySelector('.links')
 const errorMessage = document.querySelector('.error-message')
@@ -25,6 +26,13 @@ newLinkForm.addEventListener('submit', (e) => {
     .then(clearForm)
     .then(renderLinks)
     .catch(error => handleError(error, url))
+})
+
+linksSection.addEventListener('click', (e) => {
+  if (e.target.href) {
+    e.preventDefault()
+    shell.openExternal(e.target.href)
+  }
 })
 
 clearStorageButton.addEventListener('click', function clearStorage() {
