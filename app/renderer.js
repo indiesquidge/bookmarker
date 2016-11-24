@@ -1,6 +1,7 @@
 const parser = new DOMParser()
 
 const linksSection = document.querySelector('.links')
+const errorMessage = document.querySelector('.error-message')
 const newLinkForm = document.querySelector('.new-link-form')
 const newLinkUrl = document.querySelector('.new-link-url')
 const newLinkSubmit = document.querySelector('.new-link-submit')
@@ -11,17 +12,19 @@ newLinkUrl.addEventListener('keyup', () => {
 })
 
 newLinkForm.addEventListener('submit', (e) => {
-  e.preventDefault
+  e.preventDefault()
 
   const url = newLinkUrl.value
 
   fetch(url)
+    .then(validateResponse)
     .then(response => response.text())
     .then(parseResponse)
     .then(findTitle)
     .then(title => storeLink(title, url))
     .then(clearForm)
     .then(renderLinks)
+    .catch(error => handleError(error, url))
 })
 
 clearStorageButton.addEventListener('click', function clearStorage() {
@@ -58,6 +61,18 @@ function convertToElement(link) {
 function renderLinks() {
   const linkElements = getLinks().map(convertToElement).join('')
   linksSection.innerHTML = linkElements
+}
+
+function handleError(error, url) {
+  errorMessage.innerHTML = `
+  There was an issue adding "${url}": ${error.message}
+  `.trim()
+  setTimeout(() => errorMessage.innerText = null, 5000)
+}
+
+function validateResponse(response) {
+  if (response.ok) return response
+  throw new Error(`Status code of ${response.status} ${response.statusText}`)
 }
 
 renderLinks()
